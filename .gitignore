@@ -1,7 +1,6 @@
 ### IntelliJ IDEA ###
 !**/src/main/**/out/
 !**/src/test/**/out/
-.idea/workspace.xml
 
 ### Eclipse ###
 .apt_generated
