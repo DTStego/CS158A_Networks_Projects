@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="357b73e0-9728-4049-92e2-aacee3d33bcf" name="Changes" comment="Added Networking starting code.">
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CS158A_Networks_Projects.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/edu/sjsu/cs158a/CommandLine.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/edu/sjsu/cs158a/HelloUDPServer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/edu/sjsu/cs158a/Here.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/edu/sjsu/cs158a/QoTD.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/edu/sjsu/cs158a/udp/Example.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/edu/sjsu/cs158a/udp/UDPReceiver.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/edu/sjsu/cs158a/udp/UDPSender.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2LgzOUv9T9WcEZFWkAdbRlLVo1X" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;
+  }
+}</component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="357b73e0-9728-4049-92e2-aacee3d33bcf" name="Changes" comment="" />
+      <created>1676307483195</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1676307483195</updated>
+      <workItem from="1676307484463" duration="368000" />
+      <workItem from="1676307899164" duration="90000" />
+    </task>
+    <task id="LOCAL-00001" summary="Added .gitignore file.">
+      <created>1676307694124</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1676307694124</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Added .gitignore file." />
+    <MESSAGE value="Added Networking starting code." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added Networking starting code." />
+  </component>
+</project>
