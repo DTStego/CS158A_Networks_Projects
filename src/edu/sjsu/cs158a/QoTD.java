@@ -8,9 +8,22 @@ import java.util.HashSet;
 // Homework #2
 public class QoTD
 {
+    static DatagramSocket socket;
+
+    static
+    {
+        try
+        {
+            socket = new DatagramSocket();
+        } catch (SocketException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static void main(String[] args) throws IOException
     {
-        String serverAddress = "djxmmx.net";
+        String serverAddress = "www.djxmmx.net";
         int numOfQuotes = 3;
 
         if (args.length >= 1)
@@ -102,7 +115,7 @@ public class QoTD
             packet.setPort(17);
             System.out.println(packet.getSocketAddress());
 
-            socket.send(packet);
+            QoTD.socket.send(packet);
         }
     }
 
@@ -110,14 +123,14 @@ public class QoTD
     {
         try (DatagramSocket socket = new DatagramSocket(17))
         {
-            socket.setSoTimeout(5000);
+            QoTD.socket.setSoTimeout(5000);
 
             byte[] bytes = new byte[512];
             DatagramPacket packet = new DatagramPacket(bytes, bytes.length);
 
             try
             {
-                socket.receive(packet);
+                QoTD.socket.receive(packet);
             } catch (SocketTimeoutException ex)
             {
                 System.out.println("TIMEOUT");
