@@ -1,8 +1,7 @@
 ### IntelliJ IDEA ###
-/.idea/
 !**/src/main/**/out/
 !**/src/test/**/out/
-CS158A_Networks_Projects.iml
+.idea/workspace.xml
 
 ### Eclipse ###
 .apt_generated
