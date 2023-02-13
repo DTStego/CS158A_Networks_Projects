@@ -6,25 +6,17 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 // Homework #2
-public class QoTD
+public class QotD
 {
     static DatagramSocket socket;
 
-    static
-    {
-        try
-        {
-            socket = new DatagramSocket();
-        } catch (SocketException e)
-        {
-            throw new RuntimeException(e);
-        }
-    }
 
     public static void main(String[] args) throws IOException
     {
         String serverAddress = "www.djxmmx.net";
-        int numOfQuotes = 3;
+        int numOfQuotes = 20;
+
+        socket = new DatagramSocket();
 
         if (args.length >= 1)
         {
@@ -58,8 +50,6 @@ public class QoTD
             // Receive the packet and store a quote. If the process timed out, method returns null;
             String quote = receivePacket();
 
-            System.out.println(quote + "\n");
-
             // Find an empty spot and put the quote in.
             for (int i = 0; i < quotes.length; i++)
             {
@@ -69,6 +59,11 @@ public class QoTD
             }
 
             hasAllQuotes = checkQuotes(quotes);
+        }
+
+        for (int i = 1; i <= numOfQuotes; i++)
+        {
+            System.out.println("Quote " + i + ": " + quotes[i - 1]);
         }
     }
 
@@ -103,41 +98,33 @@ public class QoTD
         if (IPAddress.equals(""))
         {
             System.out.println("No IP Address Given.");
-            return;
+            System.exit(0);
         }
 
-        try (DatagramSocket socket = new DatagramSocket())
-        {
-            byte[] bytes = new byte[512];
+        byte[] bytes = new byte[512];
 
-            DatagramPacket packet = new DatagramPacket(bytes, bytes.length);
-            packet.setAddress(InetAddress.getByName(IPAddress));
-            packet.setPort(17);
-            System.out.println(packet.getSocketAddress());
+        DatagramPacket packet = new DatagramPacket(bytes, bytes.length);
+        packet.setAddress(InetAddress.getByName(IPAddress));
+        packet.setPort(17);
 
-            QoTD.socket.send(packet);
-        }
+        socket.send(packet);
     }
 
     public static String receivePacket() throws IOException
     {
-        try (DatagramSocket socket = new DatagramSocket(17))
+        socket.setSoTimeout(1000);
+
+        byte[] bytes = new byte[512];
+        DatagramPacket packet = new DatagramPacket(bytes, bytes.length);
+
+        try
         {
-            QoTD.socket.setSoTimeout(5000);
-
-            byte[] bytes = new byte[512];
-            DatagramPacket packet = new DatagramPacket(bytes, bytes.length);
-
-            try
-            {
-                QoTD.socket.receive(packet);
-            } catch (SocketTimeoutException ex)
-            {
-                System.out.println("TIMEOUT");
-                return null;
-            }
-
-            return new String(packet.getData());
+            socket.receive(packet);
+        } catch (SocketTimeoutException ex)
+        {
+            return null;
         }
+
+        return new String(bytes);
     }
 }
