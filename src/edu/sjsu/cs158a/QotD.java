@@ -17,7 +17,15 @@ public class QotD
 
         if (args.length >= 1)
         {
-            serverAddress = args[0];
+            if (!args[0].equals("127.0.0.1"))
+            {
+                serverAddress = args[0];
+
+                if (!serverAddress.startsWith("www."))
+                {
+                    serverAddress = "www.".concat(serverAddress);
+                }
+            }
 
             if (args.length > 2)
             {
