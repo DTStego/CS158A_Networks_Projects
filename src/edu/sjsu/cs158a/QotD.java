@@ -13,7 +13,7 @@ public class QotD
         String serverAddress = "www.djxmmx.net";
         int numOfQuotes = 3;
 
-        DatagramSocket socket = new DatagramSocket(17);
+        DatagramSocket socket = new DatagramSocket();
 
         if (args.length >= 1)
         {
@@ -103,6 +103,7 @@ public class QotD
         DatagramPacket packet = new DatagramPacket(bytes, bytes.length);
         packet.setAddress(InetAddress.getByName(IPAddress));
         packet.setPort(17);
+        // System.out.println(packet.getSocketAddress());
 
         socket.send(packet);
     }
