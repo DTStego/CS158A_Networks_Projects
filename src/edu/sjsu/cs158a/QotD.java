@@ -8,15 +8,12 @@ import java.util.HashSet;
 // Homework #2
 public class QotD
 {
-    static DatagramSocket socket;
-
-
     public static void main(String[] args) throws IOException
     {
         String serverAddress = "www.djxmmx.net";
-        int numOfQuotes = 20;
+        int numOfQuotes = 3;
 
-        socket = new DatagramSocket();
+        DatagramSocket socket = new DatagramSocket(17);
 
         if (args.length >= 1)
         {
@@ -45,10 +42,10 @@ public class QotD
         while (!hasAllQuotes)
         {
             // Send an empty packet to the server which will send back a packet with a quote.
-            sendPacket(serverAddress);
+            sendPacket(serverAddress, socket);
 
             // Receive the packet and store a quote. If the process timed out, method returns null;
-            String quote = receivePacket();
+            String quote = receivePacket(socket);
 
             // Find an empty spot and put the quote in.
             for (int i = 0; i < quotes.length; i++)
@@ -63,7 +60,7 @@ public class QotD
 
         for (int i = 1; i <= numOfQuotes; i++)
         {
-            System.out.println("Quote " + i + ": " + quotes[i - 1]);
+            System.out.println("Quote " + i + ":\n" + quotes[i - 1]);
         }
     }
 
@@ -93,7 +90,7 @@ public class QotD
             return true;
     }
 
-    public static void sendPacket(String IPAddress) throws IOException
+    public static void sendPacket(String IPAddress, DatagramSocket socket) throws IOException
     {
         if (IPAddress.equals(""))
         {
@@ -110,7 +107,7 @@ public class QotD
         socket.send(packet);
     }
 
-    public static String receivePacket() throws IOException
+    public static String receivePacket(DatagramSocket socket) throws IOException
     {
         socket.setSoTimeout(1000);
 
@@ -125,6 +122,6 @@ public class QotD
             return null;
         }
 
-        return new String(bytes);
+        return new String(bytes, 0, packet.getLength() - 1);
     }
 }
