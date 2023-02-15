@@ -131,6 +131,6 @@ public class QotD
             return null;
         }
 
-        return new String(bytes, 0, packet.getLength() - 1);
+        return new String(bytes, 0, packet.getLength());
     }
 }
