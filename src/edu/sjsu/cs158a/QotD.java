@@ -10,34 +10,21 @@ public class QotD
 {
     public static void main(String[] args) throws IOException
     {
-        String serverAddress = "www.djxmmx.net";
+        String serverAddress = args[0];
         int numOfQuotes = 3;
 
         DatagramSocket socket = new DatagramSocket();
 
-        if (args.length >= 1)
+        if (args.length > 2)
         {
-            if (!args[0].equals("127.0.0.1"))
+            if (args[1].equals("--count"))
             {
-                serverAddress = args[0];
-
-                if (!serverAddress.startsWith("www."))
+                try
                 {
-                    serverAddress = "www.".concat(serverAddress);
-                }
-            }
-
-            if (args.length > 2)
-            {
-                if (args[1].equals("--count"))
+                    numOfQuotes = Integer.parseInt(args[2]);
+                } catch (NumberFormatException ex)
                 {
-                    try
-                    {
-                        numOfQuotes = Integer.parseInt(args[2]);
-                    } catch (NumberFormatException ex)
-                    {
-                        ex.printStackTrace();
-                    }
+                    ex.printStackTrace();
                 }
             }
         }
@@ -55,11 +42,14 @@ public class QotD
             // Receive the packet and store a quote. If the process timed out, method returns null;
             String quote = receivePacket(socket);
 
+            HashSet<String> testList = new HashSet<>(Arrays.asList(quotes));
+
             // Find an empty spot and put the quote in.
             for (int i = 0; i < quotes.length; i++)
             {
                 // If the quote is null (receivePacket() timed out), do nothing.
-                if (quotes[i] == null && quote != null)
+                // If adding the quote to the hashset returns false, that means it's a duplicate!
+                if (quotes[i] == null && quote != null && testList.add(quote))
                     quotes[i] = quote;
             }
 
@@ -73,9 +63,9 @@ public class QotD
     }
 
     /**
-     * Check whether the quotes array has n amounts of distinct quotes. If there are duplicates, remove the duplicate.
+     * Check whether the quotes array is full. Elements that are null indicates it is not full.
      * @param quotes A String array
-     * @return boolean identifying whether the parameter has every index filled with distinct quotes.
+     * @return boolean identifying whether the parameter has every index filled, i.e., not null.
      */
     public static boolean checkQuotes(String[] quotes)
     {
@@ -86,16 +76,7 @@ public class QotD
                 return false;
         }
 
-        // Compare the sizes of the initial array and a hashSet (No duplicates) and return the result.
-        HashSet<String> comparison = new HashSet<>(Arrays.asList(quotes));
-
-        if (comparison.size() != quotes.length)
-        {
-            comparison.toArray(quotes);
-            return false;
-        }
-        else
-            return true;
+        return true;
     }
 
     public static void sendPacket(String IPAddress, DatagramSocket socket) throws IOException
