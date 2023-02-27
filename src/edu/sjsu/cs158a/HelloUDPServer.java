@@ -1,5 +1,7 @@
 package edu.sjsu.cs158a;
 
+import edu.sjsu.cs158a.udp.Conversation;
+
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -13,7 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
+import java.util.*;
 
 public class HelloUDPServer
 {
@@ -77,45 +79,69 @@ public class HelloUDPServer
         System.out.println("Listening on port " + port);
         socket = new DatagramSocket(port);
 
-        // A unique conversation number that identifies this conversation.
-        // Don't know about conflicts so currently hardcoded.
-        int convoNumber = 1331;
-        String nameOfSender = null;
+        // Contains a list of conversations for simultaneous communication with multiple clients.
+        Map<Integer, Conversation> conversationList = new HashMap<>();
 
-        // Retrieving the first message from the sender.
+        // Assigns this number to any new conversations and increments by one for additional conversations.
+        int conversationAssignment = 100;
+
         while (true)
         {
-            // Receive the first packet!
-            byte[] messageBytes = receivePacket();
+            DatagramPacket packet = receivePacket();
+            byte[] message = packet.getData();
 
-            // Wait until you actually receive a packet, aka, checks for packet loss.
-            if (messageBytes != null)
+            // Indicates a timeout error from receivePacket();
+            if (message == null)
             {
-                // Wrap the byte array in a ByteBuffer to ease retrieval.
-                ByteBuffer bb = ByteBuffer.wrap(messageBytes);
+                continue;
+            }
 
-                // Should contain [the number 1 as a network order 2-byte integer, "hello, i am name (id)"]
-                short msgNum = bb.getShort();
+            String IPAddress = packet.getAddress().getHostAddress();
 
-                // Keep requesting packets if the server did not send the first message.
-                if (msgNum != 1)
-                    continue;
+            ByteBuffer bb = ByteBuffer.wrap(message);
 
-                System.out.println(msgNum + " " + convoNumber);
+            // Conversation order number (1, 2, 3, 5).
+            short msgNum = bb.getShort();
 
-                // Gets the remaining message "hello, i am name (id)".
+            // Client attempt to start a new conversation.
+            // [the number 1 as a network order 2-byte integer, "hello, i am name (id)"]
+            if (msgNum == 1)
+            {
+                // Allocates and stores message for the introduction (hello, i am [name]) of the conversation.
+                byte[] hello = new byte[bb.array().length - bb.position()];
+                bb.get(hello);
 
-                // Allocates enough space for the message. If you allocate too little space, .get() throws a BufferUnderflowException.
-                byte[] bytes = new byte[bb.array().length - bb.position()];
-                // Fills the bytes array with the rest of the message.
-                bb.get(bytes);
-                String message = new String(bytes);
+                // Name of the sender.
+                String name = new String(hello);
 
-                // Retrieves the (id) or name_of_the_sender from the message.
-                nameOfSender = message.substring(message.indexOf("am") + 2);
-                break;
+                // Iterate through the conversationList to check if the new handshake is a duplicate.
+                for (Map.Entry<Integer, Conversation> entry : conversationList.entrySet())
+                {
+                    if (entry.getValue().getNameOfSender().equals(name))
+                    {
+                        System.out.println(msgNum + " " + entry.getKey());
+
+                        // Resend confirmation.
+                        bb = ByteBuffer.allocate(100);
+                        bb.putShort((short) 1);
+                        bb.putInt(entry.getKey());
+                        bb.put("hello, i am jimmy".getBytes());
+
+                    }
+                }
+
+                // No duplicates! Create a new conversation object and store in the conversation list.
+                conversationList.put(conversationAssignment, new Conversation((short) 1, name));
+                System.out.println(msgNum + " " + conversationAssignment);
+
+                // Increment counter for future, new conversations.
+                conversationAssignment++;
+
+                // Send confirmation
             }
         }
+
+        // -------------------------------------------------------------------------------------
 
         // Keep sending a confirmation of the first message until the server starts sending the file/second message.
         boolean firstMessageConfirmed = false;
@@ -303,7 +329,7 @@ public class HelloUDPServer
         socket.send(packet);
     }
 
-    public static byte[] receivePacket() throws IOException
+    public static DatagramPacket receivePacket() throws IOException
     {
         socket.setSoTimeout(5000);
 
@@ -322,11 +348,7 @@ public class HelloUDPServer
 
         System.out.print("From " + packet.getSocketAddress() + ": ");
 
-        // Retain the IP address to reuse during message confirmation.
-        senderIPAddress = packet.getAddress().getHostAddress();
-        senderPortAddress = packet.getPort();
-
-        // Return the byte[] packet but cut the length to the packet size, not 512 bytes.
-        return Arrays.copyOf(bytes, packet.getLength());
+       // Return the packet for parsing in main.
+        return packet;
     }
 }
