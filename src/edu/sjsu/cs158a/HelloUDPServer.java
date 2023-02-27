@@ -267,8 +267,6 @@ public class HelloUDPServer
                 {
                     if (remainingMsg[i] != SHAHash[i])
                     {
-                        System.out.println("DOES NOT MATCH");
-                        System.out.println();
                         bb.put((byte) 1);
 
                         sendPacket(bb, senderPortAddress, 3, convoNumber);
@@ -277,7 +275,6 @@ public class HelloUDPServer
                     }
                 }
 
-                System.out.println("MATCHES");
                 bb.put((byte) 0);
 
                 sendPacket(bb, senderPortAddress, 3, convoNumber);
@@ -308,7 +305,7 @@ public class HelloUDPServer
 
     public static byte[] receivePacket() throws IOException
     {
-        socket.setSoTimeout(20000);
+        socket.setSoTimeout(5000);
 
         byte[] bytes = new byte[512];
         DatagramPacket packet = new DatagramPacket(bytes, bytes.length);
