@@ -33,7 +33,7 @@ public class HelloUDPServer
         // Program requires one argument that details a port number (int) between 0 and 65535.
         if (args.length < 1)
         {
-            System.out.println("Missing required parameter: '<port>'\n" + usageMsg);
+            System.err.println("Missing required parameter: '<port>'\n" + usageMsg);
             System.exit(2);
         }
 
@@ -44,33 +44,33 @@ public class HelloUDPServer
 
             if (port < 0 || port > 65535)
             {
-                System.out.println("port must be a number between 0 and 65535\n" + usageMsg);
+                System.err.println("port must be a number between 0 and 65535\n" + usageMsg);
                 System.exit(2);
             }
 
         }
         catch (NumberFormatException ex)
         {
-            System.out.println("port must be a number between 0 and 65535\n" + usageMsg);
+            System.err.println("port must be a number between 0 and 65535\n" + usageMsg);
             System.exit(2);
         }
 
         // Reached when a port number has correctly been retrieved but there are additional, unused arguments.
         if (args.length > 1)
         {
-            System.out.print("Unmatched arguments from index 1: ");
+            System.err.print("Unmatched arguments from index 1: ");
             // Loop through the arguments past the port number.
             for (int i = 1; i < args.length; i++)
             {
-                System.out.print("'" + args[i] + "'");
+                System.err.print("'" + args[i] + "'");
 
                 if (i != args.length - 1)
                 {
-                    System.out.print(", ");
+                    System.err.print(", ");
                 }
             }
 
-            System.out.print("\n" + usageMsg);
+            System.err.println("\n" + usageMsg);
             System.exit(2);
         }
 
@@ -268,6 +268,7 @@ public class HelloUDPServer
                     if (remainingMsg[i] != SHAHash[i])
                     {
                         System.out.println("DOES NOT MATCH");
+                        System.out.println();
                         bb.put((byte) 1);
 
                         sendPacket(bb, senderPortAddress, 3, convoNumber);
