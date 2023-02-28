@@ -1,7 +1,5 @@
 package edu.sjsu.cs158a;
 
-import edu.sjsu.cs158a.udp.Conversation;
-
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -96,7 +94,8 @@ public class HelloUDPServer
                 continue;
             }
 
-            String IPAddress = packet.getAddress().getHostAddress();
+            // Truncate filler bytes.
+            message = Arrays.copyOf(message, packet.getLength());
 
             ByteBuffer bb = ByteBuffer.wrap(message);
 
@@ -113,6 +112,7 @@ public class HelloUDPServer
 
                 // Name of the sender.
                 String name = new String(hello);
+                name = name.substring(name.indexOf("am ") + 3);
 
                 // Iterate through the conversationList to check if the new handshake is a duplicate.
                 for (Map.Entry<Integer, Conversation> entry : conversationList.entrySet())
@@ -121,12 +121,23 @@ public class HelloUDPServer
                     {
                         System.out.println(msgNum + " " + entry.getKey());
 
-                        // Resend confirmation.
-                        bb = ByteBuffer.allocate(100);
-                        bb.putShort((short) 1);
-                        bb.putInt(entry.getKey());
-                        bb.put("hello, i am jimmy".getBytes());
+                        // Client did not receive the confirmation message. Resend!
+                        if (entry.getValue().getDiscussionPointer() == msgNum)
+                        {
+                            bb = ByteBuffer.allocate(50);
+                            bb.putShort((short) 1);
+                            bb.putInt(entry.getKey());
+                            bb.put("hello, i am jimmy".getBytes());
 
+                            sendPacket(bb, senderPortAddress, 1, entry.getKey());
+                            System.exit(0);
+                        }
+                        // Error if the discussion has moved on, and we're getting introductions again.
+                        else
+                        {
+                         sendError("We've moved on from the introduction. Current Discussion: "
+                                 + entry.getValue().getDiscussionPointer(), entry.getKey());
+                        }
                     }
                 }
 
@@ -134,168 +145,134 @@ public class HelloUDPServer
                 conversationList.put(conversationAssignment, new Conversation((short) 1, name));
                 System.out.println(msgNum + " " + conversationAssignment);
 
+                // Send confirmation.
+                bb = ByteBuffer.allocate(50);
+                bb.putShort((short) 1);
+                bb.putInt(conversationAssignment);
+                bb.put("hello, i am jimmy".getBytes());
+                sendPacket(bb, senderPortAddress, 1, conversationAssignment);
+
                 // Increment counter for future, new conversations.
                 conversationAssignment++;
-
-                // Send confirmation
             }
-        }
-
-        // -------------------------------------------------------------------------------------
-
-        // Keep sending a confirmation of the first message until the server starts sending the file/second message.
-        boolean firstMessageConfirmed = false;
-
-        ByteArrayOutputStream byteArrayCollection = new ByteArrayOutputStream();
-
-        int offsetPointer = -1;
-
-        // Send a confirmation of the first message and retrieve the second message.
-        while (true)
-        {
-            if (!firstMessageConfirmed)
-            {
-                // Create a ByteBuffer with [the number 1 as a network order 2-byte integer,
-                // conversation number as a network order 4-byte integer, "hello, i am <your name>"]
-                ByteBuffer bb = ByteBuffer.allocate(100);
-                bb.putShort((short) 1);
-                bb.putInt(convoNumber);
-                bb.put("hello, i am jimmy".getBytes());
-
-                sendPacket(bb, senderPortAddress, 1, convoNumber);
-            }
-
-            byte[] messageBytes = receivePacket();
 
             /* Client sends a file to the server in 100-byte chunks, except for the last chunk possibly with:
              * [the number 2 as a network order 2-byte integer, conversation number as a network order 4-byte integer,
              * offset of bytes as a network order 4-byte integer, bytes of the file]. the file will be name_of_the_sender.txt.
              */
-            if (messageBytes != null)
+            if (msgNum == 2)
             {
-                ByteBuffer bb = ByteBuffer.wrap(messageBytes);
+                int conversationNumber = bb.getInt();
 
-                short msgNum = bb.getShort();
-                System.out.println(msgNum + " " + convoNumber);
+                // Find the conversation in conversationList.
+                Conversation conversation = conversationList.get(conversationNumber);
 
-                // Check if we're currently on the 2nd conversation.
-                if (msgNum != 2)
+                if (conversation == null)
                 {
-                    // Exit the loop if the third message is sent!
-                    if (msgNum == 3)
-                    {
-
-                        break;
-                    }
-
-                    System.out.println("Wrong Message Conversation: Expected - 2 | Got - " + msgNum);
+                    sendError("Message out of place! Cannot find conversation.", conversationNumber);
                     System.exit(2);
                 }
 
-                int receivedConvoNumber = bb.getInt();
+                conversation.setDiscussionPointer(2);
 
-                // Check if this is the right conversation (unique number).
-                if (receivedConvoNumber != convoNumber)
-                {
-                    System.out.println("These conversation numbers are different! " +
-                            "Expected - " + convoNumber + " | Got - " + receivedConvoNumber);
-                }
+                // Log where the packet came from.
+                System.out.println(msgNum + " " + conversationNumber);
 
                 int receivedOffset = bb.getInt();
 
-                // Check to make sure the offsets are different, otherwise, it means that the message has been repeated.
-                if (receivedOffset <= offsetPointer)
+                // Check to make sure the new offset is greater than the current offset pointer, otherwise it's a duplicate.
+                if (receivedOffset <= conversation.getFileOffset())
                 {
-                    // Same message has been repeated. Resend the confirmation method.
-                    bb = ByteBuffer.allocate(100);
+                    // Resend confirmation.
+                    bb = ByteBuffer.allocate(50);
                     bb.putShort((short) 2);
-                    bb.putInt(convoNumber);
-                    bb.putInt(offsetPointer);
+                    bb.putInt(conversationNumber);
+                    bb.putInt(receivedOffset);
 
-                    sendPacket(bb, senderPortAddress,  2, convoNumber);
+                    sendPacket(bb, senderPortAddress, 2, conversationNumber);
                     continue;
                 }
-                else
+
+                // If the difference between the two offsets is greater than
+                // the 100-byte chunk difference, there is clearly some unknown error.
+                if (receivedOffset - conversation.getFileOffset() > 101)
                 {
-                    offsetPointer = receivedOffset;
+                    System.out.println("Major Error!");
+
+                    sendError("File transfer out of place! Current offset: " + conversation.getFileOffset()
+                            + " | Got: " + receivedOffset, conversationNumber);
+                    System.exit(2);
                 }
 
-                byte[] remainingMsg = new byte[messageBytes.length - bb.position()];
-                // Fills the bytes array with the rest of the message.
-                bb.get(remainingMsg);
+                conversation.setFileOffset(receivedOffset);
 
-                byteArrayCollection.write(remainingMsg);
-                firstMessageConfirmed = true;
+                // Copy the remaining message to fileContents which should contain a chunk of the file.
+                byte[] fileContents = new byte[message.length - bb.position()];
+                bb.get(fileContents);
 
-                /* Server sends [the number 2 as a network order 2-byte integer, conversation number as a
-                 * network order 4-byte integer, offset of bytes as a network order 4-byte integer]
-                 */
-                bb = ByteBuffer.allocate(100);
+                // Add the file contents to the byte[] collection (contains the files).
+                conversation.addToByteArrayOutputStream(fileContents);
+
+                // Send confirmation: [the number 3 as a network order 2-byte integer,
+                // conversation number as a network order 4-byte integer, the first 8 bytes of the SHA-256 digest]
+                bb = ByteBuffer.allocate(50);
                 bb.putShort((short) 2);
-                bb.putInt(convoNumber);
-                bb.putInt(offsetPointer);
+                bb.putInt(conversationNumber);
+                bb.putInt(receivedOffset);
 
-                sendPacket(bb, senderPortAddress,  2, convoNumber);
+                sendPacket(bb, senderPortAddress, 2, conversationNumber);
             }
-        }
 
-        // Save the file contained in ByteArrayOutputStream byteArrayCollection.
-        OutputStream outputStream = new FileOutputStream(nameOfSender.concat(".txt"));
-        byteArrayCollection.writeTo(outputStream);
-
-        /* the client will send the checksum: [the number 3 as a network order 2-byte integer,
-         * conversation number as a network order 4-byte integer, the first 8 bytes of the SHA-256 digest]
-         */
-        while (true)
-        {
-            byte[] messageBytes = receivePacket();
-
-            if (messageBytes != null)
+            /* Checksum process: [the number 3 as a network order 2-byte integer,
+             * conversation number as a network order 4-byte integer, the first 8 bytes of the SHA-256 digest]
+             */
+            if (msgNum == 3)
             {
-                ByteBuffer bb = ByteBuffer.wrap(messageBytes);
+                int conversationNumber = bb.getInt();
 
-                short msgNum = bb.getShort();
-                System.out.println(msgNum + " " + convoNumber);
+                Conversation conversation = conversationList.get(conversationNumber);
 
-                if (msgNum != 3)
+                if (conversation == null)
                 {
-                    System.out.println("Wrong Message Conversation: Expected - 3 | Got - " + msgNum);
+                    sendError("Message out of place! Cannot find conversation.", conversationNumber);
+                    System.exit(2);
                 }
 
-                int receivedConvoNumber = bb.getInt();
+                conversation.setDiscussionPointer(3);
 
-                // Check if this is the right conversation (unique number).
-                if (receivedConvoNumber != convoNumber)
-                {
-                    System.out.println("These conversation numbers are different! " +
-                            "Expected - " + convoNumber + " | Got - " + receivedConvoNumber);
-                }
+                // Log where the packet came from.
+                System.out.println(msgNum + " " + conversationNumber);
 
-                // Contains the first 8 bytes of the SHA-256 digest.
-                byte[] remainingMsg = new byte[messageBytes.length - bb.position()];
+                // Create a new file based from the ByteArrayOutputStream in the Conversation object.
+                OutputStream outputStream = new FileOutputStream(conversation.getNameOfSender().concat(".txt"));
+                conversation.getByteArrayOutputStream().writeTo(outputStream);
 
-                // Fills the bytes array with the rest of the message.
-                bb.get(remainingMsg);
+                // Should contain eight bytes (Noted in assignment details).
+                byte[] receivedHash = new byte[8];
+
+                // Store the remaining message into receivedHash.
+                bb.get(receivedHash);
 
                 // Generate the SHA-256 hash for the file that was received in the previous conversation.
-                byte[] data = Files.readAllBytes(Paths.get(nameOfSender.concat(".txt")));
-                byte[] SHAHash = MessageDigest.getInstance("SHA-256").digest(data);
+                byte[] data = Files.readAllBytes(Paths.get(conversation.getNameOfSender().concat(".txt")));
+                byte[] actualHash = MessageDigest.getInstance("SHA-256").digest(data);
 
                 // Start generating the confirmation message (which includes whether the SHA hash matches).
                 // [the number 3 as a network order 2-byte integer, conversation number as a network order 4-byte integer,
                 // one byte of 0 for success or 1 for failure, failure message if any]
                 bb = ByteBuffer.allocate(100);
                 bb.putShort((short) 3);
-                bb.putInt(convoNumber);
+                bb.putInt(conversationNumber);
 
-                // Iterate through the first 8 bytes of the SHA-256 digest and compare with the actual (SHAHash)
-                for (int i = 0; i < remainingMsg.length; i++)
+                // Iterate through the first 8 bytes of the SHA-256 digest and compare with actualHash.
+                for (int i = 0; i < receivedHash.length; i++)
                 {
-                    if (remainingMsg[i] != SHAHash[i])
+                    // Failure detected, send an error.
+                    if (receivedHash[i] != actualHash[i])
                     {
                         bb.put((byte) 1);
 
-                        sendPacket(bb, senderPortAddress, 3, convoNumber);
+                        sendPacket(bb, senderPortAddress, 3, conversationNumber);
 
                         System.exit(2);
                     }
@@ -303,8 +280,8 @@ public class HelloUDPServer
 
                 bb.put((byte) 0);
 
-                sendPacket(bb, senderPortAddress, 3, convoNumber);
-                break;
+                sendPacket(bb, senderPortAddress, 3, conversationNumber);
+                System.exit(0);
             }
         }
     }
@@ -347,8 +324,20 @@ public class HelloUDPServer
         }
 
         System.out.print("From " + packet.getSocketAddress() + ": ");
+        senderPortAddress = packet.getPort();
+        senderIPAddress = packet.getAddress().getHostAddress();
 
        // Return the packet for parsing in main.
         return packet;
+    }
+
+    // Send an error to the client if a wrong/unknown message got sent.
+    public static void sendError(String errorMessage, int conversationID) throws IOException
+    {
+        ByteBuffer bb = ByteBuffer.allocate(50);
+        bb.putShort((short) 5);
+        bb.put(errorMessage.getBytes());
+
+        sendPacket(bb, senderPortAddress, 5, conversationID);
     }
 }
