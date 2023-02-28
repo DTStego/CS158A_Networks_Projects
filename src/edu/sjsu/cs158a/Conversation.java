@@ -9,10 +9,10 @@ public class Conversation
     private short discussionPointer;
 
     // Name of the sender which is used to identify the transferred file.
-    private String nameOfSender;
+    private final String nameOfSender;
 
     // For storing chunks of byte[] data in an arrayList type structure.
-    private ByteArrayOutputStream byteArrayOutputStream;
+    private final ByteArrayOutputStream byteArrayOutputStream;
 
     // Stores the progress of the file transfer.
     private int fileOffset;

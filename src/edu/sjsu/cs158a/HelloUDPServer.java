@@ -130,13 +130,14 @@ public class HelloUDPServer
                             bb.put("hello, i am jimmy".getBytes());
 
                             sendPacket(bb, senderPortAddress, 1, entry.getKey());
-                            System.exit(0);
+                            break;
                         }
                         // Error if the discussion has moved on, and we're getting introductions again.
                         else
                         {
                          sendError("We've moved on from the introduction. Current Discussion: "
                                  + entry.getValue().getDiscussionPointer(), entry.getKey());
+                         System.exit(2);
                         }
                     }
                 }
@@ -194,14 +195,18 @@ public class HelloUDPServer
                 }
 
                 // If the difference between the two offsets is greater than
-                // the 100-byte chunk difference, there is clearly some unknown error.
-                if (receivedOffset - conversation.getFileOffset() > 101)
+                // the 100-byte chunk difference, there is clearly some ordering error.
+                if (receivedOffset - conversation.getFileOffset() > 100)
                 {
-                    System.out.println("Major Error!");
+                    // Resend current status of the download, i.e., send the stored offset.
+                    // Resend confirmation.
+                    bb = ByteBuffer.allocate(50);
+                    bb.putShort((short) 2);
+                    bb.putInt(conversationNumber);
+                    bb.putInt(conversation.getFileOffset());
 
-                    sendError("File transfer out of place! Current offset: " + conversation.getFileOffset()
-                            + " | Got: " + receivedOffset, conversationNumber);
-                    System.exit(2);
+                    sendPacket(bb, senderPortAddress, 2, conversationNumber);
+                    continue;
                 }
 
                 conversation.setFileOffset(receivedOffset);
@@ -249,7 +254,6 @@ public class HelloUDPServer
 
                 // Should contain eight bytes (Noted in assignment details).
                 byte[] receivedHash = new byte[8];
-
                 // Store the remaining message into receivedHash.
                 bb.get(receivedHash);
 
@@ -260,9 +264,11 @@ public class HelloUDPServer
                 // Start generating the confirmation message (which includes whether the SHA hash matches).
                 // [the number 3 as a network order 2-byte integer, conversation number as a network order 4-byte integer,
                 // one byte of 0 for success or 1 for failure, failure message if any]
-                bb = ByteBuffer.allocate(100);
+                bb = ByteBuffer.allocate(7);
                 bb.putShort((short) 3);
                 bb.putInt(conversationNumber);
+
+                byte errorNumber = 0;
 
                 // Iterate through the first 8 bytes of the SHA-256 digest and compare with actualHash.
                 for (int i = 0; i < receivedHash.length; i++)
@@ -270,18 +276,13 @@ public class HelloUDPServer
                     // Failure detected, send an error.
                     if (receivedHash[i] != actualHash[i])
                     {
-                        bb.put((byte) 1);
-
-                        sendPacket(bb, senderPortAddress, 3, conversationNumber);
-
-                        System.exit(2);
+                        errorNumber = 1;
+                        break;
                     }
                 }
 
-                bb.put((byte) 0);
-
+                bb.put(errorNumber);
                 sendPacket(bb, senderPortAddress, 3, conversationNumber);
-                System.exit(0);
             }
         }
     }
@@ -308,7 +309,7 @@ public class HelloUDPServer
 
     public static DatagramPacket receivePacket() throws IOException
     {
-        socket.setSoTimeout(5000);
+        socket.setSoTimeout(10000);
 
         byte[] bytes = new byte[512];
         DatagramPacket packet = new DatagramPacket(bytes, bytes.length);
@@ -319,8 +320,8 @@ public class HelloUDPServer
         }
         catch (SocketTimeoutException ex)
         {
-            System.out.println("TIMEOUT ERROR");
-            return null;
+            System.out.println("Timeout");
+            System.exit(2);
         }
 
         System.out.print("From " + packet.getSocketAddress() + ": ");
