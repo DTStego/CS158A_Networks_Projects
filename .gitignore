@@ -3,6 +3,7 @@
 !**/src/test/**/out/
 out
 .idea/uiDesigner.xml
+.idea/inspectionProfiles
 
 ### Eclipse ###
 .apt_generated
