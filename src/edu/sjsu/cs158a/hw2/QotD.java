@@ -1,4 +1,4 @@
-package edu.sjsu.cs158a;
+package edu.sjsu.cs158a.hw2;
 
 import java.io.IOException;
 import java.net.*;

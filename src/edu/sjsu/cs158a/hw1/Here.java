@@ -1,4 +1,4 @@
-package edu.sjsu.cs158a;
+package edu.sjsu.cs158a.hw1;
 
 import java.io.IOException;
 import java.io.InputStream;

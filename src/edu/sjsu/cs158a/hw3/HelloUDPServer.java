@@ -1,6 +1,5 @@
-package edu.sjsu.cs158a;
+package edu.sjsu.cs158a.hw3;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;

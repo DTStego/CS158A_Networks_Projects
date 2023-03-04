@@ -1,4 +1,4 @@
-package edu.sjsu.cs158a;
+package edu.sjsu.cs158a.hw3;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Model.CommandSpec;
@@ -10,7 +10,6 @@ import picocli.CommandLine.Spec;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -29,9 +28,9 @@ import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static edu.sjsu.cs158a.HelloUDP.CliUtil.debug;
-import static edu.sjsu.cs158a.HelloUDP.CliUtil.error;
-import static edu.sjsu.cs158a.HelloUDP.CliUtil.info;
+import static edu.sjsu.cs158a.hw3.HelloUDP.CliUtil.debug;
+import static edu.sjsu.cs158a.hw3.HelloUDP.CliUtil.error;
+import static edu.sjsu.cs158a.hw3.HelloUDP.CliUtil.info;
 
 @CommandLine.Command
 public class HelloUDP implements Callable<Integer> {
