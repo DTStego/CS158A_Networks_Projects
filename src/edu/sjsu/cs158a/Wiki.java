@@ -75,7 +75,7 @@ public class Wiki
             // Reads 5120 bytes at a time from the page.
             byte[] webpageData = new byte[10240];
 
-            int rc = 0;
+            int rc;
 
             // While there is website data available...
             while ((rc = inputStream.read(webpageData)) > 0)
