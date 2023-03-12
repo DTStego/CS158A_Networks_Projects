@@ -3,7 +3,7 @@ package edu.sjsu.cs158a;
 import javax.swing.text.html.parser.ParserDelegator;
 import java.io.*;
 import java.net.URL;
-import java.util.ArrayList;
+import java.net.UnknownHostException;
 import java.util.LinkedHashSet;
 
 public class Wiki
@@ -96,7 +96,7 @@ public class Wiki
             return byteArrayStream.toString();
         }
         // Case for if the URL is invalid.
-        catch (FileNotFoundException e)
+        catch (FileNotFoundException | UnknownHostException ex)
         {
             System.out.println("Could not search: " + wikipediaPrefix.concat(webpageName));
             System.exit(1);
