@@ -4,16 +4,16 @@ import javax.swing.text.html.parser.ParserDelegator;
 import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 public class Wiki
 {
     // HashSet containing child links (only one layer) that are in the first page.
-    public static final HashSet<String> childList = new HashSet<>();
+    public static final LinkedHashSet<String> childList = new LinkedHashSet<>();
 
     // If the specific page for "Geographic_coordinate_system" is found, end the program using this boolean.
     public static boolean isFound = false;
-    public static final String wikipediaPrefix = "https://www.wikipedia.com/wiki/";
+    public static final String wikipediaPrefix = "https://en.wikipedia.org/wiki/";
     public static final String endPage = "Geographic_coordinate_system";
 
 
@@ -25,8 +25,6 @@ public class Wiki
             System.exit(2);
         }
 
-        System.out.println("Searching: " + args[0].replaceAll("_", " ") + " - Wikipedia");
-
         // Case for if the argument matches the endPage.
         if (args[0].equals(endPage))
         {
@@ -36,6 +34,8 @@ public class Wiki
 
         // Scrape the first page.
         String webpageContent = webScrape(args[0]);
+
+        System.out.println("Searching: " + args[0].replaceAll("_", " ") + " - Wikipedia");
 
         ParserDelegator delegator = new ParserDelegator();
 
@@ -55,6 +55,8 @@ public class Wiki
             webpageContent = webScrape(s);
             delegator.parse(new StringReader(webpageContent), new MyParser.MyParserCallback(), true);
         }
+
+        System.out.println("Not found");
     }
 
     /**
@@ -99,5 +101,4 @@ public class Wiki
         // Unknown error where no article was able to be retrieved.
         return null;
     }
-
 }

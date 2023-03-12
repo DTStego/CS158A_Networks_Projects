@@ -22,6 +22,7 @@ public class MyParser
             if (tag == HTML.Tag.A)
             {
                 String s = (String) a.getAttribute(HTML.Attribute.HREF);
+
                 if (s != null && s.startsWith("/wiki/"))
                 {
                     // Check if it's the stop condition (Found the "Geographic_coordinate_system" page).
