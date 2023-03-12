@@ -13,8 +13,9 @@ public class Wiki
 
     // If the specific page for "Geographic_coordinate_system" is found, end the program using this boolean.
     public static boolean isFound = false;
+    public static boolean searchingChildren = false;
     public static final String wikipediaPrefix = "https://en.wikipedia.org/wiki/";
-    public static final String endPage = "Geographic_coordinate_system";
+    public static String endPage = "Geographic_coordinate_system";
 
 
     public static void main(String[] args) throws IOException
@@ -25,10 +26,18 @@ public class Wiki
             System.exit(2);
         }
 
+        if (args.length > 1)
+        {
+            System.err.println("Too Many Arguments!");
+            System.exit(2);
+        }
+
         // Case for if the argument matches the endPage.
         if (args[0].equals(endPage))
         {
-            System.out.println("Found in: " + args[0].replaceAll("_", " ") + " - Wikipedia");
+            endPage = endPage.replaceAll("_", " ");
+            System.out.println("Searching: " + endPage + " - Wikipedia");
+            System.out.println("Found in: " + endPage + " - Wikipedia");
             System.exit(0);
         }
 
@@ -46,10 +55,9 @@ public class Wiki
         // If "endPage" was not found in the first page, check the pages in "childList"
         System.out.println("Checking children:");
 
-        // Store contents of childList in an ArrayList so the Parser can't add elements, perhaps messing with iteration.
-        ArrayList<String> tempList = new ArrayList<>(childList);
+        searchingChildren = true;
 
-        for (String s : tempList)
+        for (String s : childList)
         {
             // Scrape the page and parse.
             webpageContent = webScrape(s);
@@ -74,8 +82,8 @@ public class Wiki
             URL wikipediaURL = new URL(wikipediaPrefix.concat(webpageName));
             InputStream inputStream = wikipediaURL.openStream();
 
-            // Reads 5120 bytes at a time from the page.
-            byte[] webpageData = new byte[10240];
+            // Reads 1024 bytes at a time from the page.
+            byte[] webpageData = new byte[1024];
 
             int rc;
 

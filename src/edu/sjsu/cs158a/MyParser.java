@@ -19,30 +19,31 @@ public class MyParser
                 isInTitle = true;
             }
 
-            if (tag == HTML.Tag.A)
+            if (tag != HTML.Tag.A)
             {
-                String s = (String) a.getAttribute(HTML.Attribute.HREF);
+                return;
+            }
 
-                if (s != null && s.startsWith("/wiki/"))
+            // Retrieve the text inside the <a href> tag.
+            String s = (String) a.getAttribute(HTML.Attribute.HREF);
+
+            if (s != null && s.startsWith("/wiki/"))
+            {
+                // Check if it's the stop condition (Found the "Geographic_coordinate_system" page).
+                if (s.equals("/wiki/".concat(Wiki.endPage)))
                 {
-                    // Check if it's the stop condition (Found the "Geographic_coordinate_system" page).
-                    if (s.equals("/wiki/".concat(Wiki.endPage)))
-                    {
-                        Wiki.isFound = true;
-                        System.out.println("Found in: " + currentTitle);
-                        System.exit(0);
-                    }
-                    // Add to the end of the child list.
-                    else
-                    {
-                        // Assignment says you only need to check for ':' for invalid links.
-                        // Adding other elements increases runtime dramatically.
-                        if (!s.contains(":"))
-                        {
-                            // Add the part of the link after "/wiki/" to the childList in Wiki.java.
-                            Wiki.childList.add(s.substring(6));
-                        }
-                    }
+                    Wiki.isFound = true;
+                    System.out.println("Found in: " + currentTitle);
+                    System.exit(0);
+                }
+                // Add to the end of the child list.
+
+                // Assignment says you only need to check for ':' for invalid links.
+                // Adding other elements increases runtime dramatically.
+                if (!s.contains(":") && !Wiki.searchingChildren)
+                {
+                    // Add the part of the link after "/wiki/" to the childList in Wiki.java.
+                    Wiki.childList.add(s.substring(6));
                 }
             }
         }
