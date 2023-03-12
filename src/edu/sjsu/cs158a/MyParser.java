@@ -35,9 +35,9 @@ public class MyParser
                     // Add to the end of the child list.
                     else
                     {
-                        // No easy way to invalidate a link. Every link takes time to check so this is a very
-                        // archaic way of checking if it's a valid link based on output from wiki links.
-                        if (!s.contains(":") && !s.contains("%") && !s.contains(".") && !s.contains("#"))
+                        // Assignment says you only need to check for ':' for invalid links.
+                        // Adding other elements increases runtime dramatically.
+                        if (!s.contains(":"))
                         {
                             // Add the part of the link after "/wiki/" to the childList in Wiki.java.
                             Wiki.childList.add(s.substring(6));
