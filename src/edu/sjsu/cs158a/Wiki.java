@@ -36,8 +36,6 @@ public class Wiki
         // Scrape the first page.
         String webpageContent = webScrape(args[0]);
 
-        System.out.println("Searching: " + args[0].replaceAll("_", " ") + " - Wikipedia");
-
         ParserDelegator delegator = new ParserDelegator();
 
         // Parse the information on the page, looking for content based on MyParser.java.

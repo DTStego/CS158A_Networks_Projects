@@ -52,6 +52,10 @@ public class MyParser
         {
             if (isInTitle)
             {
+                // Only print out Searching: [Title] for the parent!
+                if (!Wiki.searchingChildren)
+                    System.out.println("Searching: " + new String(data));
+
                 currentTitle = new String(data);
             }
         }
