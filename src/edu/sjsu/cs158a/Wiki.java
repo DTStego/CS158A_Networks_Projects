@@ -33,15 +33,6 @@ public class Wiki
             System.exit(0);
         }
 
-        // Case for if the argument matches the endPage.
-        if (args[0].equals(endPage))
-        {
-            endPage = endPage.replaceAll("_", " ");
-            System.out.println("Searching: " + endPage + " - Wikipedia");
-            System.out.println("Found in: " + endPage + " - Wikipedia");
-            System.exit(0);
-        }
-
         // Scrape the first page.
         String webpageContent = webScrape(args[0]);
 
