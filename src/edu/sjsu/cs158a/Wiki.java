@@ -1,9 +1,11 @@
 package edu.sjsu.cs158a;
 
 import javax.swing.text.html.parser.ParserDelegator;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.LinkedHashSet;
 
 public class Wiki
@@ -12,7 +14,6 @@ public class Wiki
     public static final LinkedHashSet<String> childList = new LinkedHashSet<>();
 
     // If the specific page for "Geographic_coordinate_system" is found, end the program using this boolean.
-    public static boolean isFound = false;
     public static boolean searchingChildren = false;
     public static final String wikipediaPrefix = "https://en.wikipedia.org/wiki/";
     public static String endPage = "Geographic_coordinate_system";
@@ -23,13 +24,13 @@ public class Wiki
         if (args.length < 1)
         {
             System.err.println("Please input a string containing the portion of the Wikipedia link after /wiki/");
-            System.exit(2);
+            System.exit(0);
         }
 
         if (args.length > 1)
         {
             System.err.println("Too Many Arguments!");
-            System.exit(2);
+            System.exit(0);
         }
 
         // Case for if the argument matches the endPage.
@@ -49,7 +50,7 @@ public class Wiki
         ParserDelegator delegator = new ParserDelegator();
 
         // Parse the information on the page, looking for content based on MyParser.java.
-        // The variable "isFound" will change if the parser finds "endPage". Otherwise, the "childList" is filled.
+        // If the page isn't found, fill the childList with links from the initial page.
         delegator.parse(new StringReader(webpageContent), new MyParser.MyParserCallback(), true);
 
         // If "endPage" was not found in the first page, check the pages in "childList"
@@ -85,28 +86,24 @@ public class Wiki
             // Reads 1024 bytes at a time from the page.
             byte[] webpageData = new byte[1024];
 
-            int rc;
+            int packetSize;
 
             // While there is website data available...
-            while ((rc = inputStream.read(webpageData)) > 0)
+            while ((packetSize = inputStream.read(webpageData)) > 0)
             {
-                byteArrayStream.write(webpageData, 0, rc);
+                byteArrayStream.write(webpageData, 0, packetSize);
             }
 
             return byteArrayStream.toString();
         }
         // Case for if the URL is invalid.
-        catch (FileNotFoundException | UnknownHostException ex)
+        catch (IOException ex)
         {
             System.out.println("Could not search: " + wikipediaPrefix.concat(webpageName));
             System.exit(1);
         }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
 
         // Unknown error where no article was able to be retrieved.
-        return null;
+        throw new UnknownError("Random Error Reached!");
     }
 }

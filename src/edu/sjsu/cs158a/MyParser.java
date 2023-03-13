@@ -27,12 +27,11 @@ public class MyParser
             // Retrieve the text inside the <a href> tag.
             String s = (String) a.getAttribute(HTML.Attribute.HREF);
 
-            if (s != null && s.startsWith("/wiki/"))
+            if (s != null && s.startsWith("/wiki") && !s.contains(":"))
             {
                 // Check if it's the stop condition (Found the "Geographic_coordinate_system" page).
                 if (s.equals("/wiki/".concat(Wiki.endPage)))
                 {
-                    Wiki.isFound = true;
                     System.out.println("Found in: " + currentTitle);
                     System.exit(0);
                 }
@@ -40,7 +39,7 @@ public class MyParser
 
                 // Assignment says you only need to check for ':' for invalid links.
                 // Adding other elements increases runtime dramatically.
-                if (!s.contains(":") && !Wiki.searchingChildren)
+                if (!Wiki.searchingChildren)
                 {
                     // Add the part of the link after "/wiki/" to the childList in Wiki.java.
                     Wiki.childList.add(s.substring(6));
