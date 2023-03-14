@@ -11,6 +11,16 @@ public class MyParser
         static boolean isInTitle = false;
         static String currentTitle;
 
+        /**
+         * Handle tags. Print out the title of a page by parsing the "title" tag.
+         * A "a href" tag indicates links. Grab the link and check for the exit
+         * condition ('endPage' in Wiki.java). Otherwise, store the page in the
+         * LinkedHashSet in Wiki.java if there are no colons in the link.
+         *
+         * @param tag The HTML tag that is recognized by the parser.
+         * @param a Set of attributes inside the tag, e.g., href, rel, or class.
+         * @param pos Position where the tag is located. Can be used to insert new tags/attributes.
+         */
         @Override
         public void handleStartTag(HTML.Tag tag, MutableAttributeSet a, int pos)
         {
@@ -27,6 +37,13 @@ public class MyParser
             // Retrieve the text inside the <a href> tag.
             String s = (String) a.getAttribute(HTML.Attribute.HREF);
 
+            /*
+             * Continue only if the getAttribute() method returned the text inside the "a href" tag,
+             * the text starts with "wiki/", and it doesn't contain any colons (which would invalidate the link).
+             *
+             * Assignment says to only check for invalidation using colons.
+             * Adding more checks increases program runtime dramatically!
+             */
             if (s != null && s.startsWith("/wiki") && !s.contains(":"))
             {
                 // Check if it's the stop condition (Found the "Geographic_coordinate_system" page).
@@ -35,10 +52,8 @@ public class MyParser
                     System.out.println("Found in: " + currentTitle);
                     System.exit(0);
                 }
-                // Add to the end of the child list.
 
-                // Assignment says you only need to check for ':' for invalid links.
-                // Adding other elements increases runtime dramatically.
+                // Otherwise, add to the end of the child list.
                 if (!Wiki.searchingChildren)
                 {
                     // Add the part of the link after "/wiki/" to the childList in Wiki.java.
@@ -47,6 +62,14 @@ public class MyParser
             }
         }
 
+        /**
+         * Links are handled in the handleStartTag() method. Only titles are handled in this method.
+         * If the text that is called upon is in a "title" tag, print out the title
+         * if the parser is not in a child link.
+         *
+         * @param data Text which is stored in a char[] array. Can be converted into a String.
+         * @param pos Position where the tag is located. Can be used to insert new text in the page.
+         */
         @Override
         public void handleText(char[] data, int pos)
         {
@@ -60,6 +83,12 @@ public class MyParser
             }
         }
 
+        /**
+         * Change the isInTitle boolean to note that the parser is no longer in a title.
+         *
+         * @param tag The HTML tag that is recognized by the parser.
+         * @param pos Position where the tag is located.
+         */
         @Override
         public void handleEndTag(HTML.Tag tag, int pos)
         {

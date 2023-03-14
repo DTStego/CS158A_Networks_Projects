@@ -10,15 +10,20 @@ import java.util.LinkedHashSet;
 
 public class Wiki
 {
-    // HashSet containing child links (only one layer) that are in the first page.
+    // LinkedHashSet containing child links (only one layer) that are in the first page. Need to retain order.
     public static final LinkedHashSet<String> childList = new LinkedHashSet<>();
 
-    // If the specific page for "Geographic_coordinate_system" is found, end the program using this boolean.
     public static boolean searchingChildren = false;
     public static final String wikipediaPrefix = "https://en.wikipedia.org/wiki/";
     public static String endPage = "Geographic_coordinate_system";
 
-
+    /**
+     * Program pulls a Wikipedia page's source code and scrapes the page to look for the page:
+     * "Geographic_coordinate_system". It will be in a <a href></a> tag which MyParser can parse from
+     * the HTML source code. If the link isn't found in the page (from args), loop through all the links
+     * inside the first page and check if the exit condition is in one of those child pages. You do not
+     * need to search the links in the child pages (only one level of search).
+     */
     public static void main(String[] args) throws IOException
     {
         if (args.length < 1)
@@ -33,13 +38,13 @@ public class Wiki
             System.exit(0);
         }
 
-        // Scrape the first page.
         String webpageContent = webScrape(args[0]);
 
         ParserDelegator delegator = new ParserDelegator();
 
         // Parse the information on the page, looking for content based on MyParser.java.
         // If the page isn't found, fill the childList with links from the initial page.
+        // parse() calls implemented methods in MyParser based on tags and program ends on exit condition.
         delegator.parse(new StringReader(webpageContent), new MyParser.MyParserCallback(), true);
 
         // If "endPage" was not found in the first page, check the pages in "childList"
@@ -60,11 +65,13 @@ public class Wiki
     /**
      * Attempts to connect to a Wikipedia page and pull
      * all information from the page using Java's URL class.
-     * @return String that contains all data from a Wikipedia page.
+     * @return String that contains the HTML source code from a Wikipedia page.
      * @param webpageName Contains the Wikipedia url portion after the "/wiki/" part. Spaces are underscores.
      */
     public static String webScrape(String webpageName)
     {
+        // Should perhaps switch to an InputStreamReader() but the ByteArrayOutputStream still works.
+        // String concatenation causes program slowdown due to the size of a page.
         ByteArrayOutputStream byteArrayStream = new ByteArrayOutputStream();
 
         try
@@ -75,6 +82,7 @@ public class Wiki
             // Reads 1024 bytes at a time from the page.
             byte[] webpageData = new byte[1024];
 
+            // InputStream.read() returns the size of the packet read.
             int packetSize;
 
             // While there is website data available...
@@ -83,6 +91,7 @@ public class Wiki
                 byteArrayStream.write(webpageData, 0, packetSize);
             }
 
+            // Return the entire page's HTML source code as a string for parsing.
             return byteArrayStream.toString();
         }
         // Case for if the URL is invalid.
