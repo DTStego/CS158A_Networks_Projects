@@ -1,4 +1,4 @@
-package edu.sjsu.cs158a;
+package edu.sjsu.cs158a.hw4;
 
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;
