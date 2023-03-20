@@ -1,4 +1,4 @@
-package edu.sjsu.cs158a;
+package edu.sjsu.cs158a.hw4;
 
 import javax.swing.text.html.parser.ParserDelegator;
 import java.io.ByteArrayOutputStream;
