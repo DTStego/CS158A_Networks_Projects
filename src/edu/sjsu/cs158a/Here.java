@@ -9,6 +9,8 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 // Homework #1
 public class Here
@@ -77,6 +79,8 @@ public class Here
         // Read things from server
         InputStream in = socket.getInputStream();
 
+        System.out.println("Client: contacting " + socket.getRemoteSocketAddress());
+
         // First character is an 8-bit number denoting the length of the message.
         int length = in.read();
 
@@ -91,7 +95,7 @@ public class Here
         // Example student ID with the initial zero truncated as ints don't accept starting zeros... octal integer.
         int myID = 1555733224;
 
-        // Alternatively, you can use a ByteBuffer to convert it for you.
+        // You can use a ByteBuffer to convert it for you.
         byte[] idBytes = ByteBuffer.allocate(4).putInt(myID).array();
 
         // Converts your name to a byte array to send to server.
@@ -102,6 +106,7 @@ public class Here
         out.write(idBytes);
         out.write(nameBytes.length);
         out.write(nameBytes);
+        out.flush();
 
         // Read the pin that the server gives back (Specified as four bytes).
         var pin = in.readNBytes(4);
@@ -117,6 +122,8 @@ public class Here
 
     public static void startServer(int port, String name) throws IOException
     {
+        Executor executor = Executors.newSingleThreadExecutor();
+
         try (ServerSocket serverSocket = new ServerSocket(port))
         {
             // Ten second server timeout!
@@ -126,7 +133,7 @@ public class Here
             {
                 try
                 {
-                    new Thread(new ServerRunnable(serverSocket.accept(), name)).start();
+                    executor.execute(new ServerRunnable(serverSocket.accept(), name));
                 }
                 catch (SocketTimeoutException exception)
                 {
