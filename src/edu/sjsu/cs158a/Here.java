@@ -38,7 +38,6 @@ public class Here
             catch (ConnectException exception)
             {
                 System.err.println("Connection cannot be made to: " + args[1] + ":" + args[2] + "!");
-                // exception.printStackTrace();
             }
         }
 
