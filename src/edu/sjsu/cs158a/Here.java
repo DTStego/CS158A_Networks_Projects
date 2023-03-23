@@ -78,8 +78,6 @@ public class Here
         // Read things from server
         InputStream in = socket.getInputStream();
 
-        System.out.println("Client: contacting " + socket.getRemoteSocketAddress());
-
         // First character is an 8-bit number denoting the length of the message.
         int length = in.read();
 
