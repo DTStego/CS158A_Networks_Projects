@@ -11,6 +11,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 // Homework #1
@@ -123,7 +124,7 @@ public class Here
 
     public static void startServer(int port, String name) throws IOException
     {
-        Executor executor = Executors.newSingleThreadExecutor();
+        ExecutorService executor = Executors.newCachedThreadPool();
 
         try (ServerSocket serverSocket = new ServerSocket(port))
         {
@@ -138,6 +139,7 @@ public class Here
                 }
                 catch (SocketTimeoutException exception)
                 {
+                    executor.shutdown();
                     System.err.println("Server Timeout.");
                     System.exit(2);
                 }
