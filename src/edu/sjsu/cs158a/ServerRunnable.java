@@ -69,7 +69,7 @@ public class ServerRunnable implements Runnable
         int length = inputStream.read();
         String name = new String(inputStream.readNBytes(length));
 
-        System.out.println("contact from " + name + " " + "(" + SSID + ") at " + socket.getRemoteSocketAddress());
+        // System.out.println("contact from " + name + " " + "(" + SSID + ") at " + socket.getRemoteSocketAddress());
 
         // Create a random PIN and send it to the client.
         byte[] randomPin = ByteBuffer.allocate(4).putInt(new Random().nextInt(1000, 10_000)).array();
@@ -91,6 +91,6 @@ public class ServerRunnable implements Runnable
         outputStream.write(finishingMessage.length);
         outputStream.write(finishingMessage);
 
-        System.out.println("sent message to " + socket.getRemoteSocketAddress() + ": " + successMessage);
+        // System.out.println("sent message to " + socket.getRemoteSocketAddress() + ": " + successMessage);
     }
 }

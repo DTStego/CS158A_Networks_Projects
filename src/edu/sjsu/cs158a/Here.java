@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Random;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -97,7 +98,7 @@ public class Here
         byte[] idBytes = ByteBuffer.allocate(4).putInt(myID).array();
 
         // Converts your name to a byte array to send to server.
-        String name = "Jimmy Nguyen";
+        String name = "Jimmy Nguyen".concat(String.valueOf(new Random().nextInt(100)));
         byte[] nameBytes = name.getBytes();
 
         // Sends your ID, length of your name, and your name to the server.
@@ -114,6 +115,8 @@ public class Here
 
         // Read and print the success message that the server should give back.
         var successMessage = in.readNBytes(in.read());
+
+        try { Thread.sleep(1000); } catch (InterruptedException ignored) {};
 
         System.out.println(new String(successMessage));
     }
