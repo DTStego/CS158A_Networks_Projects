@@ -60,7 +60,8 @@ public class Here
             {
                 try
                 {
-                    startClient(new Socket(args[1], Integer.parseInt(args[2])));
+                    for (int i = 0; i < 7; i++)
+                        startClient(new Socket(args[1], Integer.parseInt(args[2])));
                 } catch (IOException e)
                 {
                     throw new RuntimeException(e);
