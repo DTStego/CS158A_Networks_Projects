@@ -8,13 +8,11 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.Random;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-// Homework #1
+// Homework #1 + #5
 public class Here
 {
     public static void main(String[] args) throws IOException, InterruptedException
@@ -55,8 +53,6 @@ public class Here
                     throw new RuntimeException(e);
                 }
             }).start();
-
-            Thread.sleep(10);
 
             new Thread(() ->
             {
