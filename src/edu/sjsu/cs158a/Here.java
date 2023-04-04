@@ -41,6 +41,7 @@ public class Here
             }
         }
 
+        // Test case to create a server and multiple clients automatically.
         if (args[0].equalsIgnoreCase("test"))
         {
             new Thread(() ->
@@ -54,18 +55,19 @@ public class Here
                 }
             }).start();
 
-            new Thread(() ->
+            for (int i = 0; i < 7; i++)
             {
-                try
+                new Thread(() ->
                 {
-                    for (int i = 0; i < 7; i++)
+                    try
+                    {
                         startClient(new Socket(args[1], Integer.parseInt(args[2])));
-                } catch (IOException e)
-                {
-                    throw new RuntimeException(e);
-                }
-            }).start();
-
+                    } catch (IOException e)
+                    {
+                        throw new RuntimeException(e);
+                    }
+                }).start();
+            }
         }
     }
 
@@ -95,7 +97,7 @@ public class Here
         byte[] idBytes = ByteBuffer.allocate(4).putInt(myID).array();
 
         // Converts your name to a byte array to send to server.
-        String name = "Jimmy Nguyen".concat(String.valueOf(new Random().nextInt(100)));
+        String name = "Jimmy Nguyen";
         byte[] nameBytes = name.getBytes();
 
         // Sends your ID, length of your name, and your name to the server.
@@ -112,8 +114,6 @@ public class Here
 
         // Read and print the success message that the server should give back.
         var successMessage = in.readNBytes(in.read());
-
-        try { Thread.sleep(1000); } catch (InterruptedException ignored) {};
 
         System.out.println(new String(successMessage));
     }
