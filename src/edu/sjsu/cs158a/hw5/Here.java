@@ -1,4 +1,4 @@
-package edu.sjsu.cs158a;
+package edu.sjsu.cs158a.hw5;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,7 +8,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
-import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 

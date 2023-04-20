@@ -1,4 +1,4 @@
-package edu.sjsu.cs158a;
+package edu.sjsu.cs158a.hw5;
 
 import java.io.*;
 import java.net.Socket;
